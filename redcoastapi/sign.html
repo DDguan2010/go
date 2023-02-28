@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+  <html lang="en">
+  <head>
+      <meta charset="UTF-8">
+      <title>sign</title>
+  </head>
+  <body onload=out()>
+      <p id=text></p>
+      <script>
+
+function getQueryString(name) {
+    var reg = new RegExp('(^|&)' + name + '=([^&]*)(&|$)', 'i');
+    var r = window.location.search.substr(1).match(reg);
+    if (r != null) {
+        return decodeURI(r[2]);
+    }
+    return null;
+}
+function out(){
+  //getElementById('text').innerHTML
+  var name=getQueryString('name');
+  var password=getQueryString('password');
+  var json=JSON.stringify(
+          {"true":true,
+           "response":"登录成功",
+           "id":null,
+           "data":{}}
+          )
+  if (name!=null && password!=null){
+        var xmlHttp = new XMLHttpRequest();
+    xmlHttp.open("GET", 'https://api.vika.cn/fusion/v1/datasheets/dstBmS3TZZtzfyTxcV/records?viewId=viwPpNuCNlr7H&pageSize=1000&pageNum=1',false); // false for synchronous request
+        xmlHttp.setRequestHeader('Authorization','Bearer uskFCANhodOXOVsnZY6UYqs');
+        xmlHttp.send( null );
+        var resp=JSON.parse(xmlHttp.responseText);
+    for(var i=0;i<resp["data"]["records"].length;i++){
+        if(name==resp["data"]["records"][i]["fields"]["用户名"]){
+          if(password==resp["data"]["records"][i]["fields"]["密码"]){
+            var id=resp["data"]["records"][i]["recordId"];
+          var xmlHttp = new XMLHttpRequest();
+        xmlHttp.open("GET",'https://api.vika.cn/fusion/v1/datasheets/dstBmS3TZZtzfyTxcV/records?pageSize=100&maxRecords=1000&pageNum=1&sort=&recordIds='+String(id)+'&viewId=viwPpNuCNlr7H&fields=&filterByFormula=&cellFormat=json&fieldKey=name',false); // false for synchronous request
+        xmlHttp.setRequestHeader('Authorization','Bearer uskFCANhodOXOVsnZY6UYqs');
+        xmlHttp.send( null );
+        var resp=JSON.parse(xmlHttp.responseText);
+json=JSON.stringify(
+          {"true":true,
+           "response":"登录成功",
+           "id":id,
+           "data":resp}
+          )
+            document.getElementById('text').innerHTML=json;
+            return;
+        }
+        else{
+          json=JSON.stringify(
+          {"true":false,
+           "response":"密码错误",
+           "id":null,
+           "data":{}}
+          )
+            document.getElementById('text').innerHTML=json;
+        }
+        }
+        else{
+          if(i==resp["data"]["records"].length){
+            json=JSON.stringify(
+          {"true":false,
+           "response":"用户不存在",
+           "id":null,
+           "data":{}}
+          )
+            document.getElementById('text').innerHTML=json;
+          }
+        }
+    }
+  }
+  else{
+    json=JSON.stringify(
+          {"true":false,
+           "response":"请填写完整",
+           "id":null,
+           "data":{}}
+          )
+    document.getElementById('text').innerHTML=json;
+  }
+}
+      </script>
+  </body>
+</html>
